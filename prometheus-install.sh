@@ -3,6 +3,8 @@ PROMETHEUS_VERSION="3.5.0"
 PROMETHEUS_CONFIG_DIRECTORY="/etc/prometheus"
 PROMETHEUS_DATA_DIRECTORY="/etc/prometheus/data"
 read -p "Specify the port for prometheus (if you don't know what to set, set 9090):" PORT
+
+
 if [ "$EUID" -ne 0 ] || [ -z "$SUDO_USER" ]; then
   echo "Please run this script with 'sudo'"
   exit 1
@@ -15,7 +17,6 @@ cd prometheus-$PROMETHEUS_VERSION.linux-amd64
 
 mv prometheus /usr/bin
 mkdir -p $PROMETHEUS_CONFIG_DIRECTORY $PROMETHEUS_DATA_DIRECTORY
-mv prometheus.yml $PROMETHEUS_CONFIG_DIRECTORY
 rm -rf /tmp/prometheus*
 
 cat <<EOF >$PROMETHEUS_CONFIG_DIRECTORY/prometheus.yml
