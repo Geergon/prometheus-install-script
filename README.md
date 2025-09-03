@@ -37,7 +37,9 @@ This script must be run with **root** privileges (using `sudo`).
     * Configures the service to run as the `prometheus` user.
 7. **SELinux**:
     * If SELinux is enabled (`getenforce`), the script configures the security context for the Prometheus binary.
-8. **Service Startup**:
+8. **Open port**:
+    * Open a port in the firewall for prometheus (only on systems with firewalld, in most cases these are RHEL based distributions)
+9. **Service Startup**:
     * Reloads the `systemd daemon`.
     * Enables and starts the Prometheus service.
     * Displays the service status and the Prometheus version.

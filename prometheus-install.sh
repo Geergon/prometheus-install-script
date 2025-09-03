@@ -4,16 +4,15 @@ PROMETHEUS_CONFIG_DIRECTORY="/etc/prometheus"
 PROMETHEUS_DATA_DIRECTORY="/etc/prometheus/data"
 read -p "Specify the port for prometheus (if you don't know what to set, set 9090):" PORT
 
-
 if [ "$EUID" -ne 0 ] || [ -z "$SUDO_USER" ]; then
   echo "Please run this script with 'sudo'"
   exit 1
 fi
 
-cd /tmp
+cd /tmp || exit
 wget https://github.com/prometheus/prometheus/releases/download/v$PROMETHEUS_VERSION/prometheus-$PROMETHEUS_VERSION.linux-amd64.tar.gz
 tar xfvz prometheus-$PROMETHEUS_VERSION.linux-amd64.tar.gz
-cd prometheus-$PROMETHEUS_VERSION.linux-amd64
+cd prometheus-$PROMETHEUS_VERSION.linux-amd64 || exit
 
 mv prometheus /usr/bin
 mkdir -p $PROMETHEUS_CONFIG_DIRECTORY $PROMETHEUS_DATA_DIRECTORY
@@ -41,7 +40,6 @@ rule_files:
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: "prometheus"
 
     # metrics_path defaults to '/metrics'
@@ -49,7 +47,6 @@ scrape_configs:
 
     static_configs:
       - targets: ["localhost:$PORT"]
-       # The label name is added as a label `label_name=<label_value>` to any timeseries scraped from this config.
         labels:
           app: "prometheus"
 EOF
@@ -76,6 +73,9 @@ WantedBy=multi-user.target
 EOF
 
 getenforce && semanage fcontext -a -t bin_t "/usr/bin/prometheus" && restorecon -Rv /usr/bin/prometheus
+
+firewall-cmd --permanent --zone=public --add-port="$PORT"/tcp
+firewall-cmd --reload
 
 systemctl daemon-reload
 systemctl enable --now prometheus.service
